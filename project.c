@@ -14,13 +14,15 @@ struct Student {
 char currentUser[20];
 char currentRole[10];
 
+int loginSystem();
 void mainMenu();
 void adminMenu();
-
-int loginSystem();
+void userMenu();
 void addStudent();
 void displayStudents();
 void searchStudent();
+void updateStudent();
+void deleteStudent();
 
 int main() {
     if (loginSystem()) {
@@ -30,6 +32,7 @@ int main() {
     }
     return 0;
 }
+
 
 int loginSystem() {
     char username[20], password[20];
@@ -92,6 +95,22 @@ void adminMenu() {
     } while (1);
 }
 
+void userMenu() {
+    printf("\n===== USER MENU =====\n");
+    printf("1. Display All Students\n");
+    printf("2. Search Student\n");
+    printf("3. Logout\n");
+
+    int choice;
+    scanf("%d", &choice);
+
+    switch (choice) {
+        case 1: displayStudents(); break;
+        case 2: searchStudent(); break;
+        default: return;
+    }
+}
+
 void addStudent() {
     FILE *fp = fopen(STUDENT_FILE, "a");
     if (!fp) {
@@ -113,6 +132,7 @@ void addStudent() {
 
     printf("Student added successfully!\n");
 }
+
 
 void displayStudents() {
     FILE *fp = fopen(STUDENT_FILE, "r");
@@ -158,4 +178,68 @@ void searchStudent() {
         printf("No record found!\n");
 
     fclose(fp);
+}
+
+
+void updateStudent() {
+    int r, found = 0;
+    struct Student st;
+
+    printf("Enter roll number to update: ");
+    scanf("%d", &r);
+
+    FILE *fp = fopen(STUDENT_FILE, "r");
+    FILE *temp = fopen("temp.txt", "w");
+
+    while (fscanf(fp, "%d %s %f", &st.roll, st.name, &st.marks) == 3) {
+        if (st.roll == r) {
+            found = 1;
+            printf("Enter new Name: ");
+            scanf("%s", st.name);
+            printf("Enter new Marks: ");
+            scanf("%f", &st.marks);
+        }
+        fprintf(temp, "%d %s %.2f\n", st.roll, st.name, st.marks);
+    }
+
+    fclose(fp);
+    fclose(temp);
+
+    remove(STUDENT_FILE);
+    rename("temp.txt", STUDENT_FILE);
+
+    if (found)
+        printf("Record Updated!\n");
+    else
+        printf("Record Not Found!\n");
+}
+
+void deleteStudent() {
+    int r, found = 0;
+    struct Student st;
+
+    printf("Enter roll number to delete: ");
+    scanf("%d", &r);
+
+    FILE *fp = fopen(STUDENT_FILE, "r");
+    FILE *temp = fopen("temp.txt", "w");
+
+    while (fscanf(fp, "%d %s %f", &st.roll, st.name, &st.marks) == 3) {
+        if (st.roll != r) {
+            fprintf(temp, "%d %s %.2f\n", st.roll, st.name, st.marks);
+        } else {
+            found = 1;
+        }
+    }
+
+    fclose(fp);
+    fclose(temp);
+
+    remove(STUDENT_FILE);
+    rename("temp.txt", STUDENT_FILE);
+
+    if (found)
+        printf("Record Deleted!\n");
+    else
+        printf("Record Not Found!\n");
 }
